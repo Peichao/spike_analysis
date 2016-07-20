@@ -1,6 +1,6 @@
 traces = dict(
     raw_data_files=[experiment_name + '.dat'],
-    voltage_gain=1.,
+    voltage_gain=10.,
     sample_rate=24414.4,
     n_channels=32,
     dtype='int16',

@@ -1,7 +1,10 @@
 import os
+import scipy as sp
+from scipy import stats
+import numpy as np
 import tkinter as tk
 from tkinter import filedialog
-from phy.io import KwikModel
+from klusta.kwik.model import KwikModel
 
 
 def get_kwik_path():
@@ -76,3 +79,53 @@ def get_kwik_model(kwik_path, channel_group):
     model = KwikModel(kwik_path, channel_group=channel_group)
     model.clustering = 'main'
     return model
+
+
+def primary_channel(kwik_path, block, channel_group):
+    kwik_dir = os.path.abspath(os.path.join(kwik_path, os.pardir))
+    phy_dir = kwik_dir + '/' + block + '.phy'
+    phymetadir = phy_dir + '/cluster_store/%d/main/' % channel_group
+    filesphy = [(phymetadir, filename) for filename in os.listdir(phymetadir)]
+
+    have_mask = [file_entry[1] for file_entry in filesphy if '.mean_masks' in file_entry[1]]
+
+    cluster_id = np.zeros((len(have_mask)))
+    primary_chan = np.zeros((len(have_mask)))
+
+    for idx, mask_file in enumerate(have_mask):
+        waveformsfile = phymetadir + mask_file
+        arr = np.fromfile(waveformsfile, dtype=np.float32)
+
+        cluster_id[idx] = mask_file.split('.')[0]
+        primary_chan[idx] = np.argmax(arr)
+
+    makedict = {'cluster_id': cluster_id, 'primary_chan': primary_chan}
+    keys = makedict['cluster_id'].astype(int)
+    values = makedict['primary_chan'].astype(int)
+    primary_chan_dict = dict(zip(keys, values))
+    return primary_chan_dict
+
+
+def t2hot1(X):
+    n = np.shape(X)[0]
+    p = np.shape(X)[1]
+    mu = np.zeros([1, p])
+    m = np.mean(X, axis=0)
+    S = np.cov(X.T)
+    if sp.linalg.det(S) == 0:
+        return 1
+    else:
+        T2 = np.dot(np.dot((n*(m-mu)), sp.linalg.inv(S)), (m - mu).conj().transpose())
+
+        if n >=50:
+            X2 = T2
+            v = p
+            P = 1 - sp.stats.chi2.cdf(X2, v)
+
+        else:
+            F = (n - p) / ((n - 1) * p) * T2
+            v1 = p
+            v2 = n - p
+            P = 1 - sp.stats.f.cdf(F, v1, v2)
+
+    return P

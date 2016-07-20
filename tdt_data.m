@@ -1,9 +1,9 @@
 clear all; close all; clc
 
 %% define tankpath, block, and output file name
-tankpath = 'D:\salk data\VIPCR\20150826\20150826';
-block = 'LED-2';
-output_file_path = 'D:\salk data\VIPCR\20150826\LED-2.dat';
+tankpath = 'C:\Users\anupam\Desktop\salk data\VIPCR\20150915\20150915';
+block = 'ORIxLR-2';
+output_file_path = 'C:\Users\anupam\Desktop\salk data\VIPCR\20150915\ORIxLR-2.dat';
 
 %% start activeX control
 figure(88)

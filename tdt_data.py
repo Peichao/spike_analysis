@@ -28,6 +28,10 @@ def get_block():
     block = input("Enter block name: ")
     return block
 
+def get_date():
+    date = input("Recording Date: ")
+    return date
+
 
 def extract_matlab_data(tank_path, block):
     """
@@ -53,6 +57,16 @@ def extract_ori(tank_path, block):
 
     eng.quit()
     return lfpsi, time_index_array, epocs_array
+
+
+def extract_leon_timestamps(tank_path, block):
+    eng = matlab.engine.start_matlab()
+    leon_timestamps = eng.tdt_extract_leon_timestamps(tank_path, block)
+
+    leon_timestamps_array = np.array(leon_timestamps._data).reshape(leon_timestamps.size[::-1]).T
+
+    eng.quit()
+    return leon_timestamps_array
 
 
 def save_matlab_dat(tank_path, block):
